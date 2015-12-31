@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 
 # C extensions
-*.so
+#*.so
 
 # Distribution / packaging
 .Python
@@ -55,3 +55,4 @@ docs/_build/
 
 # PyBuilder
 target/
+statlib/FEXACT_A.F90
