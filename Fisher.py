@@ -105,23 +105,23 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
                 raise ValueError('Less than 2 non-zero column or row marginal,\n %s'%c)
 
             statistic = -np.sum(lgamma(c+1))
-            tmp_res =  fisher_sim(c, replicate, seed)
+            tmp_res = _fisher_sim(c, replicate, seed)
             almost = 1 + 64 * np.finfo(np.double).eps
             pval = (None, (1 + np.sum(tmp_res <= statistic/almost)) / (replicate + 1.))
         elif hybrid:
             pre, prt, rp = 5, 180, 1
             expect, percnt, emin = rp, rp+1, rp+2
-            pval = execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
+            pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
 
         else :
             pre, prt, rp = -1, 100, 0
             expect, percnt, emin = rp, rp+1, rp+2
-            pval = execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
+            pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
 
         return pval
 
 
-def execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace, attempt=2):
+def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace, attempt=2):
     """Execute fexact using the fortran routine"""
 
     pval = None
@@ -138,7 +138,7 @@ def execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace, attempt=2):
         
 
 
-def fisher_sim(c, replicate, seed=None):
+def _fisher_sim(c, replicate, seed=None):
     """Performs a simulation with `replicate` replicates in order to find an 
      alternative contingency test with the same margin.
     Parameters

@@ -11,9 +11,6 @@ rcont2
 
 Functions
 ---------
-execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace, attempt=2)
-    Execute fexact using the fortran routine
-
 fisher_exact(table, alternative='two-sided', hybrid=False, simulate_pval=False, replicate=2000, workspace=300, attempt=2, seed=None)
     Performs a Fisher exact test on a 2x2 contingency table.
     Parameters
@@ -77,16 +74,3 @@ fisher_exact(table, alternative='two-sided', hybrid=False, simulate_pval=False, 
     >>> oddsratio, pvalue = stats.fisher_exact([[8, 2, 12], [1, 5, 2]])
     >>> pvalue
     0.01183...
-
-fisher_sim(c, replicate, seed=None)
-    Performs a simulation with `replicate` replicates in order to find an 
-     alternative contingency test with the same margin.
-    Parameters
-    ----------
-    c : array_like of ints
-        A m x n contingency table.  Elements should be non-negative integers.
-    replicate : int
-        Number of replicates to perform for the simulation
-        
-    seed : int
-        A random number to be used as seed
