@@ -10,7 +10,6 @@ import random
 
 def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=False, 
                 replicate=2000, workspace=300,  attempt=2, seed=None):
-
     """Performs a Fisher exact test on a 2x2 contingency table.
     Parameters
     ----------
@@ -42,7 +41,6 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
         from os.urandom. If this fail, getrandbits of the random module 
         (with 32 random bits) will be used. In the particular case where both failed,
         the current time will be used
-
 
     Returns
     -------
@@ -109,7 +107,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
             statistic = -np.sum(lgamma(c+1))
             tmp_res =  fisher_sim(c, replicate, seed)
             almost = 1 + 64 * np.finfo(np.double).eps
-            pval = (1 + np.sum(tmp_res <= statistic/almost)) / (replicate + 1.)
+            pval = (None, (1 + np.sum(tmp_res <= statistic/almost)) / (replicate + 1.))
         elif hybrid:
             pre, prt, rp = 5, 180, 1
             expect, percnt, emin = rp, rp+1, rp+2
@@ -193,4 +191,4 @@ def fisher_sim(c, replicate, seed=None):
                 i += 1
                 ii += 1
         results[it] = ans
-    return None, results
+    return results
