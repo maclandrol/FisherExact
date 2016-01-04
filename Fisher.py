@@ -99,9 +99,9 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
             sr =  c.sum(axis=1) 
             sc =  c.sum(axis=0)
             # The zero colums and rows are droped here, see R function
-            c =  c[sr>0,:][:, sr>0]
+            c =  c[sr>0,:][:, sc>0]
             nr, nc = c.shape
-            if nr < 2 or nr < 2 : 
+            if nr < 2 or nc < 2 : 
                 raise ValueError('Less than 2 non-zero column or row marginal,\n %s'%c)
 
             statistic = -np.sum(lgamma(c+1))
@@ -109,13 +109,11 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
             almost = 1 + 64 * np.finfo(np.double).eps
             pval = (None, (1 + np.sum(tmp_res <= statistic/almost)) / (replicate + 1.))
         elif hybrid:
-            pre, prt, rp = 5, 180, 1
-            expect, percnt, emin = rp, rp+1, rp+2
+            expect, percnt, emin = 5, 80, 1 # this is the cochran condition
             pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
 
         else :
-            pre, prt, rp = -1, 100, 0
-            expect, percnt, emin = rp, rp+1, rp+2
+            expect, percnt, emin = -1, 100, 0
             pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
 
         return pval
