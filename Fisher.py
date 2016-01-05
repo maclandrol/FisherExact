@@ -1,14 +1,15 @@
 import scipy.stats as ss
 from scipy.special import gammaln as lgamma
 from statlib.fexact import fisher_exact as f
-from statlib.as159 import rcont2
+from statlib.asa159 import rcont2
+from statlib.asa205 import enum as rcont
 import numpy as np
 import logging
 import os
 import random
 
 
-def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=False, 
+def fisher_exact(table, alternative="two-sided", hybrid=False,  midP=False, simulate_pval=False, 
                 replicate=2000, workspace=300,  attempt=2, seed=None):
     """Performs a Fisher exact test on a 2x2 contingency table.
     Parameters
@@ -17,7 +18,8 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
         A 2x2 contingency table.  Elements should be non-negative integers.
     alternative : {'two-sided', 'less', 'greater'}, optional
         Which alternative hypothesis to the null hypothesis the test uses.
-        Default is 'two-sided'.  Only used in the 2 x 2 case.
+        Default is 'two-sided'.  Only used in the 2 x 2 case (with the scipy function).
+        In every other case, the two-sided pval is returned.
     mult : int 
         Specify the size of the workspace used in the network algorithm.  
         Only used for non-simulated p-values larger than 2 x 2 table. 
@@ -26,6 +28,10 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
         Only used for larger than 2 x 2 tables, in which cases it indicates
         whether the exact probabilities (default) or a hybrid approximation 
         thereof should be computed.
+    midP : bool
+        Use this to enable mid-P correction. Could lead to slow computation.
+        This is not applicable for simulation p-values. `alternative` cannot 
+        be used if you enable midpoint correction.
     simulate_pval : bool 
         Indicate whether to compute p-values by Monte Carlo simulation,
          in larger than 2 x 2 tables.
@@ -44,9 +50,6 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
 
     Returns
     -------
-    prt : float
-        Probability of the observed table for fixed marginal totals.
-        If it's a 2x2 table, the prior odds ratio is returned instead.
     p_value : float
         The probability of a more extreme table, where 'extreme' is in a 
         probabilistic sense.
@@ -63,13 +66,14 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
     --------
     Say we spend a few days counting whales and sharks in the Atlantic and
     Indian oceans. In the Atlantic ocean we find 8 whales and 1 shark, in the
-    Indian ocean 2 whales and 5 sharks. Then our contingency table is::
+    Indian ocean 2 whales and 5 sharks and in the Pacific 12 whales andd 2 sharks
+    Then our contingency table is::
                 Atlantic  Indian    Pacific
         whales     8        2       12
         sharks     1        5       2
     We use this table to find the p-value:
     >>> from Fisher import fisher_exact
-    >>> oddsratio, pvalue = stats.fisher_exact([[8, 2, 12], [1, 5, 2]])
+    >>> pvalue = stats.fisher_exact([[8, 2, 12], [1, 5, 2]])
     >>> pvalue
     0.01183...
     """
@@ -90,8 +94,13 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
     nr, nc = c.shape
 
     if (nr == 2 and nc == 2):
-        # in this case, just use the default scipy
-        return ss.fisher_exact(c, alternative)
+        # I'm not sure what the fisher_exact module of ss do.
+        # So use my own function if midp is asked
+        if not midP :
+            # in this case, just use the default scipy
+            return ss.fisher_exact(c, alternative)[1] # could remove this in the future
+        else:
+            return _midp(c)
 
     else:
         pval = None
@@ -107,19 +116,18 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, simulate_pval=Fal
             statistic = -np.sum(lgamma(c+1))
             tmp_res = _fisher_sim(c, replicate, seed)
             almost = 1 + 64 * np.finfo(np.double).eps
-            pval = (None, (1 + np.sum(tmp_res <= statistic/almost)) / (replicate + 1.))
+            pval = (1 + np.sum(tmp_res <= statistic/almost)) / (replicate + 1.)
         elif hybrid:
             expect, percnt, emin = 5, 80, 1 # this is the cochran condition
-            pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
-
+            pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt, midP)
         else :
             expect, percnt, emin = -1, 100, 0
-            pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt)
+            pval = _execute_fexact(nr, nc, c, nr, expect, percnt, emin, workspace, attempt, midP)
 
         return pval
 
 
-def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace, attempt=2):
+def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace, attempt=2, midP=False):
     """Execute fexact using the fortran routine"""
 
     pval = None
@@ -132,7 +140,10 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace, attempt=2):
             success = True
         except Exception as e:
             logging.warning("Workspace : %d is not enough. You should increase it.")
-    return pval
+    if midP:
+        return pval[1] - pval[0]*0.5
+    else:
+        return pval[1]
         
 
 
@@ -190,3 +201,45 @@ def _fisher_sim(c, replicate, seed=None):
                 ii += 1
         results[it] = ans
     return results
+
+
+def _midp(c):
+    """Performs Fisher's Exact test with midp correction
+    ----------
+    c : array_like of ints
+        A m x n contingency table.  Elements should be non-negative integers. 
+    """
+    sr, sc = c.sum(axis=1).astype('int32'), c.sum(axis=0).astype('int32')
+    nr, nc = len(sr), len(sc)
+    n = np.sum(sr)
+    global result
+    result = []
+    logfact = np.zeros(n+1)
+    for i in xrange(2, n+1):
+        logfact[i] = logfact[i-1] + np.log(i)
+
+    def callback(iflag, table, m, n, rowsum, colsum, prob, mult): 
+        global result;
+        if iflag==2 or (isinstance(iflag, list) and iflag[0]==2):
+            tmp = np.asarray(table.tolist())
+            if not np.all(c == tmp):
+                # only add table that are different from the original that we had
+                result.append(tmp.ravel())
+
+    def table_prob(table, sr, sc, n):
+        num = np.sum([logfact[i] for i in sr]) + np.sum([logfact[j] for j in sc])
+        den = logfact[n] + np.sum([logfact[i] for i in table])
+        return np.exp(num-den)
+
+    # After this call, all the result should be in result
+    rcont(sr, sc, callback, 0)
+    problist = []
+    for rtable in result:
+        # compute the probability of each table
+        problist.append(table_prob(rtable, sr, sc, n))
+
+    problist = np.asarray(problist)
+    problist.sort()
+    cur_prob = table_prob(c.ravel(), sr, sc, n)
+    pval = np.sum(problist[problist<= cur_prob])
+    return pval + cur_prob*0.5
