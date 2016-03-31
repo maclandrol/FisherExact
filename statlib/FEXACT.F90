@@ -1702,6 +1702,8 @@ INTEGER, INTENT(IN)           :: icode
 CHARACTER (LEN=*), INTENT(IN) :: mes
 
 WRITE (*, *) 'FEXACT ERROR: ', icode, ' ', mes
+!intent(callback) f2pystop
+!external f2pystop
 STOP
 
 END SUBROUTINE prterr
