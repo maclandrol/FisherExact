@@ -487,7 +487,7 @@ IF (k1 > 1) THEN
       GO TO 240
     END IF
   END DO
-  
+
   DO itp=1, i - 1
     ii = key2(itp)
     IF (ii == kval) THEN
@@ -498,7 +498,7 @@ IF (k1 > 1) THEN
       GO TO 240
     END IF
   END DO
-  
+
   CALL prterr (6, 'LDKEY is too small.  It is not possible to '//  &
                'give thevalue of LDKEY required, but you could '//  &
                'try doubling LDKEY (and possibly LDSTP).')
@@ -515,7 +515,7 @@ IF (k1 > 1) THEN
   DO i=3, k1
     obs2 = obs2 - fact(ico(kb+i))
   END DO
-  
+
   IF (dlp(itp) > 0.0D0) THEN
     dspt = obs - obs2 - ddf
 !                                  Compute longest path
@@ -573,7 +573,7 @@ END IF
 300 IF (pastp <= obs3) THEN
 !                                  Update pre
   pre = pre + DBLE(ifreq)*EXP(pastp+drn)
-  
+
 ELSE IF (pastp < obs2) THEN
   IF (chisq) THEN
     df  = (nro2-1)*(k1-1)
@@ -745,11 +745,11 @@ nn = mm
 IF (nrow >= ncol) THEN
   nro = nrow
   nco = ncol
-  
+
   DO i=1, nrow
     iro(i) = irow(i)
   END DO
-  
+
   ico(1) = icol(1)
   nt(1)  = nn - ico(1)
   DO i=2, ncol
@@ -759,14 +759,14 @@ IF (nrow >= ncol) THEN
 ELSE
   nro = ncol
   nco = nrow
-  
+
   ico(1) = irow(1)
   nt(1)  = nn - ico(1)
   DO i=2, nrow
     ico(i) = irow(i)
     nt(i)  = nt(i-1) - ico(i)
   END DO
-  
+
   DO i=1, ncol
     iro(i) = icol(i)
   END DO
@@ -900,7 +900,7 @@ ELSE
     END IF
     ii = ii + 1
   END DO
-  
+
   ii = ks + 1
   DO itp=1, ipn - 1
     IF (ist(ii) < 0) THEN
@@ -910,7 +910,7 @@ ELSE
     END IF
     ii = ii + 1
   END DO
-  
+
   CALL prterr (30, 'Stack length exceeded in f3xact.'//  &
                '  This problem should not occur.')
 !                                  Push onto stack
@@ -944,7 +944,7 @@ GO TO 110
     nt(i) = nt(i-1) - ico(i)
   END DO
   GO TO 90
-  
+
 ELSE IF (nro > 2 .AND. nst > 0) THEN
 !                                  Go to next level
   nitc = nst
@@ -1248,7 +1248,7 @@ IF (ipsh) THEN
     IF (key(itp) == kval) GO TO 40
     IF (key(itp) < 0) GO TO 30
   END DO
-  
+
   DO itp=1, ird - 1
     IF (key(itp) == kval) GO TO 40
     IF (key(itp) < 0) GO TO 30
@@ -1684,32 +1684,6 @@ END SUBROUTINE f11act
 
 
 !-----------------------------------------------------------------------
-!  Name:       ERPRT
-
-!  Purpose:    Print an error message and stop.
-
-!  Usage:      CALL ERPRT (ICODE, MES)
-
-!  Arguments:
-!     ICODE  - Integer code for the error message.  (Input)
-!     MES    - Character string containing the error message.  (Input)
-!-----------------------------------------------------------------------
-
-SUBROUTINE prterr (icode, mes)
-!                                  SPECIFICATIONS FOR ARGUMENTS
-
-INTEGER, INTENT(IN)           :: icode
-CHARACTER (LEN=*), INTENT(IN) :: mes
-
-WRITE (*, *) 'FEXACT ERROR: ', icode, ' ', mes
-!intent(callback) f2pystop
-!external f2pystop
-STOP
-
-END SUBROUTINE prterr
-
-
-!-----------------------------------------------------------------------
 !  Name:       ISORT
 
 !  Purpose:    Shell sort for an integer vector.
@@ -1839,11 +1813,11 @@ IF (x > xbig) THEN
 END IF
 
 IF (x <= one .OR. x < p) THEN
-  
+
 !      Use Pearson's series expansion.
 !      (Note that P is not large enough to force overflow in lngamma).
 !      No need to test IFAULT on exit since P > 0.
-  
+
   arg = p * LOG(x) - x - lngamma(p + one)
   c = one
   fn_val = one
@@ -1855,11 +1829,11 @@ IF (x <= one .OR. x < p) THEN
   arg = arg + LOG(fn_val)
   fn_val = zero
   IF (arg >= elimit) fn_val = EXP(arg)
-  
+
 ELSE
-  
+
 !      Use a continued fraction expansion
-  
+
   arg = p * LOG(x) - x - lngamma(p)
   a = one - p
   b = a + x + one
@@ -1880,15 +1854,15 @@ ELSE
     IF (ABS(fn_val - rn) <= MIN(tol, tol * rn)) GO TO 80
     fn_val = rn
   END IF
-  
+
   pn1 = pn3
   pn2 = pn4
   pn3 = pn5
   pn4 = pn6
   IF (ABS(pn5) >= oflo) THEN
-    
+
 !      Re-scale terms in continued fraction if terms are large
-    
+
     pn1 = pn1 / oflo
     pn2 = pn2 / oflo
     pn3 = pn3 / oflo

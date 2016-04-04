@@ -1,6 +1,7 @@
 import scipy.stats as ss
 from scipy.special import gammaln as lgamma
-from statlib.fexact import fisher_exact as f
+import statlib.fexact as f
+from statlib.fexact import fisher_exact as f_exact
 from statlib.asa159 import rcont2
 from statlib.asa205 import enum as rcont
 import numpy as np
@@ -8,6 +9,11 @@ import logging
 import os
 import random
 
+class F2PYSTOP(Exception):
+    def __call__(self, status, mes=""):
+        raise self.__class__(mes)
+
+f.f2pystop = F2PYSTOP()
 
 def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
                  simulate_pval=False, replicate=2000, workspace=300,
@@ -75,7 +81,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
         sharks     1        5       2
     We use this table to find the p-value:
     >>> from Fisher import fisher_exact
-    >>> pvalue = stats.fisher_exact([[8, 2, 12], [1, 5, 2]])
+    >>> pvalue = fisher_exact([[8, 2, 12], [1, 5, 2]])
     >>> pvalue
     0.01183...
     """
@@ -140,17 +146,37 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace,
                     attempt=2, midP=False):
     """Execute fexact using the fortran routine"""
 
-    pval = None
-    success = False
+    ## find required workspace 
+    #pval = None
+    #success = False
+    #ntot = np.sum(c)+1
+    #nco = max(nr, nc)
+    #nro = nr +nc - nco
+    #allocated = _iwork(0, ntot, 'double')
+    #allocated = _iwork(allocated, nco) *3 
+    #allocated = _iwork(allocated, nco) *2
+    #k =  nro + nco +1
+    #kk = k*nco
+    #allocated = _iwork(allocated, max(k*5 + (kk<<1), nco*7 + 800))
+    #allocated =  _iwork(allocated, max(nco+401, k))
+    #iwkmax = 2e+05
+    #numb = (18 + 10 * 30)
+    #ldk = (iwkmax - allocated) / numb -1
+    
     ntry = 0
+    error = None
+    wk = workspace
     while not (success or ntry >= attempt):
         ntry += 1
         try:
-            pval = f.fexact(nr, nc, c, nnr, expect, percnt, emin, workspace)
+            pval = f_exact.fexact(nr, nc, c, nnr, expect, percnt, emin, wk)
             success = True
-        except Exception as e:
+        except Exception as error:
             logging.warning(
                 "Workspace : %d is not enough. You should increase it.")
+        wk = wk << 1 #double workspace
+    if not success:
+        raise ValueError('Could not execute fexact, increase workspace')
     if midP:
         return pval[1] - pval[0] * 0.5
     else:
@@ -211,6 +237,18 @@ def _fisher_sim(c, replicate, seed=None):
                 ii += 1
         results[it] = ans
     return results
+
+
+def __iwork(allocated, number, itype='int'):
+    """Check if the allocated memory is enough"""
+    
+    i = allocated
+    if itype == 'double':
+        allocated += (number << 1)
+    else:
+        allocated += number
+
+    return allocated
 
 
 def _midp(c):
