@@ -147,8 +147,9 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace,
     """Execute fexact using the fortran routine"""
 
     ## find required workspace 
-    #pval = None
-    #success = False
+    #
+    pval = None
+    success = False
     #ntot = np.sum(c)+1
     #nco = max(nr, nc)
     #nro = nr +nc - nco
