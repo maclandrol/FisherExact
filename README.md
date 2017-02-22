@@ -63,7 +63,7 @@ For example, the following format are accepted
 
 ## Use as a module
 
-```fisher_exact(table, alternative='two-sided', hybrid=False, midP=False, simulate_pval=False, replicate=2000, workspace=300, attempt=2, seed=None)
+	fisher_exact(table, alternative='two-sided', hybrid=False, midP=False, simulate_pval=False, replicate=2000, workspace=300, attempt=2, seed=None)
         Performs a Fisher exact test on a mxn contingency table.
         
         Parameters
@@ -107,5 +107,3 @@ For example, the following format are accepted
         p_value : float
             The probability of a more extreme table, where 'extreme' is in a 
             probabilistic sense.
-        
-```
