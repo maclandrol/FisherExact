@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+import argparse
+import numpy
+import re
+import FisherExact
+
+
+def get_table_from_file(filename):
+    row, column = 0, 0
+    table = []
+    with open(filename) as F:
+        first_line = False
+        for line in F:
+            line = line.strip()
+            if line:
+                if not first_line and line.startswith('#'):
+                    first_line = True
+                    row, column = [int(x.strip())
+                                   for x in re.split(',|\s', line.replace('#', '').strip()) if x]
+                elif not line.startswith('#'):
+                    first_line = True
+                    cur_row = [int(x) for x in re.split(',|\s+', line) if x]
+                    if column:
+                        assert len(
+                            cur_row) == column, "Number of columns not matching specification"
+                    table.append(cur_row)
+    if row:
+        assert len(cur_row) == column, "Number of rows not matching specification"
+
+    # table sanity check:
+    row_size = len(cur_row)
+    passed_sanity = all([len(x) == row_size for x in table])
+    assert passed_sanity, "Incorrect table format, please verify that all columns have same size"
+    return table
+
+
+def compute_pval(args):
+    table = get_table_from_file(args.contable)
+    pval = FisherExact.fisher_exact(table, hybrid=args.hybrid, midP=args.midP,
+                                    simulate_pval=args.simulate, replicate=args.simulate,
+                                    workspace=args.workspace, attempt=args.attempt)
+    print("Pvalue : %f" % pval)
+
+if __name__ == '__main__':
+
+    # argument parser
+    parser = argparse.ArgumentParser(
+        description="Fisher's Exact test for mxn contingency table")
+
+    parser.add_argument('--simulate', dest='simulate', nargs='?', const=2000, type=int, default=0,
+                        help="Simulate p-values with n replicates")
+    parser.add_argument('--hybrid', dest='hybrid', action='store_true',
+                        help="Use hybrid mode")
+    parser.add_argument('--midP', dest='midP', action='store_true',
+                        help="Use midP correction")
+    parser.add_argument('--retry', dest='attempt', default=3, type=int,
+                        help="Number of attempt to made if execution fail")
+    parser.add_argument('--workspace', dest='workspace', default=300, type=int,
+                        help="Workspace size to use, Increase this if the program crash")
+    parser.add_argument('--version', action='version',
+                        version=FisherExact.__version__)
+    parser.add_argument('contable', metavar='table',
+                        help='Contingency table in a file, without header')
+    args = parser.parse_args()
+
+    compute_pval(args)

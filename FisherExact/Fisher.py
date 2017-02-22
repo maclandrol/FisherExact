@@ -1,3 +1,4 @@
+from builtins import range
 import scipy.stats as ss
 from scipy.special import gammaln as lgamma
 import statlib.fexact as f
@@ -17,7 +18,7 @@ f.f2pystop = F2PYSTOP()
 
 def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
                  simulate_pval=False, replicate=2000, workspace=300,
-                 attempt=2, seed=None):
+                 attempt=3, seed=None):
     """Performs a Fisher exact test on a 2x2 contingency table.
     Parameters
     ----------
@@ -30,7 +31,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
     mult : int
         Specify the size of the workspace used in the network algorithm.
         Only used for non-simulated p-values larger than 2 x 2 table.
-        You might want to increase this if the p-value failed!
+        You might want to increase this if execution failed!
     hybrid : bool
         Only used for larger than 2 x 2 tables, in which cases it indicates 
         whether the exact probabilities (default) or a hybrid approximation 
@@ -49,7 +50,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
         An integer specifying the workspace size. Default value is 300. 
     attempt : int
         Number of attempts to try, if the workspace size is not enough. 
-        On each attempt, the workspace size is doubled. 
+        On each attempt, the workspace size is doubled. Default value is 3
     seed : int
         Random number to use as seed. If a seed isn't provided. 4 bytes will be
         read from os.urandom. If this fail, getrandbits of the random module 
@@ -64,7 +65,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
 
     Notes
     -----
-    The calculated odds ratio is different from the one R uses. This scipy
+    The calculated odds ratio is different from the one R uses. The scipy
     implementation returns the (more common) "unconditional Maximum
     Likelihood Estimate", while R uses the "conditional Maximum Likelihood
     Estimate".
@@ -75,7 +76,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
     Say we spend a few days counting whales and sharks in the Atlantic and
     Indian oceans. In the Atlantic ocean we find 8 whales and 1 shark, in the
     Indian ocean 2 whales, 5 sharks and in the Pacific 12 whales and 2 sharks.
-    Then our contingency table is::
+    Then our contingency table is:: 
                 Atlantic  Indian    Pacific
         whales     8        2       12
         sharks     1        5       2
@@ -147,15 +148,12 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace,
     """Execute fexact using the fortran routine"""
 
     ## find required workspace 
-    #
-    pval = None
-    success = False
     #ntot = np.sum(c)+1
     #nco = max(nr, nc)
     #nro = nr +nc - nco
-    #allocated = _iwork(0, ntot, 'double')
-    #allocated = _iwork(allocated, nco) *3 
-    #allocated = _iwork(allocated, nco) *2
+    #allocated = __iwork(0, ntot, 'double')
+    #allocated = __iwork(allocated, nco) *3 
+    #allocated = __iwork(allocated, nco) *2
     #k =  nro + nco +1
     #kk = k*nco
     #allocated = _iwork(allocated, max(k*5 + (kk<<1), nco*7 + 800))
@@ -163,7 +161,8 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace,
     #iwkmax = 2e+05
     #numb = (18 + 10 * 30)
     #ldk = (iwkmax - allocated) / numb -1
-    
+    pval = None
+    success = False
     ntry = 0
     error = None
     wk = workspace
