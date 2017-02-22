@@ -10,7 +10,7 @@ You can install it with pip : pip install FisherExact
 
 A binary is provided to use FisherExact from the terminal
 
-	```usage: fexact [-h] [--simulate [SIMULATE]] [--hybrid] [--midP]
+	usage: fexact [-h] [--simulate [SIMULATE]] [--hybrid] [--midP]
 	              [--retry ATTEMPT] [--workspace WORKSPACE] [--version]
 	              table
 
@@ -29,7 +29,7 @@ A binary is provided to use FisherExact from the terminal
 	  --workspace WORKSPACE
 	                        Workspace size to use, Increase this if the program
 	                        crash
-	  --version             show program's version number and exit```
+	  --version             show program's version number and exit
 
 
 ## Contingency table format if fexact is used as binary
