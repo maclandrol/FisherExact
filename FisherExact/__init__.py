@@ -13,6 +13,3 @@
 
 from Fisher import fisher_exact
 __all__ = ['fisher_exact']
-__version__ = "1.2"
-__project__ = "FisherExact"
-__author__ = "Emmanuel Noutahi"

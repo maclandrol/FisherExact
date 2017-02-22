@@ -17,7 +17,10 @@ except ImportError:
 from numpy.distutils.core import Extension as Ext
 from numpy.distutils.core import setup
 
-from FisherExact import __project__, __version__ , __author__
+__version__ = "1.2.2"
+__project__ = "FisherExact"
+__author__ = "Emmanuel Noutahi"
+
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "python")))
 
 
