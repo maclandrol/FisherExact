@@ -19,7 +19,7 @@ f.f2pystop = F2PYSTOP()
 def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
                  simulate_pval=False, replicate=2000, workspace=300,
                  attempt=3, seed=None):
-    """Performs a Fisher exact test on a 2x2 contingency table.
+    """Performs a Fisher exact test on a mxn contingency table.
     Parameters
     ----------
     table : array_like of ints
