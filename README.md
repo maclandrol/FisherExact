@@ -8,6 +8,8 @@ You can install it with pip : `pip install FisherExact`
 
 If you get an error about builtins module, install "future" with `pip install future`
 
+This package use fortran sources, so you need to have a fortran compiler (`gfortran`) installed. See here ==> https://gcc.gnu.org/wiki/GFortranBinaries 
+
 ## Binary Usage
 
 A binary is provided to use FisherExact from the terminal
