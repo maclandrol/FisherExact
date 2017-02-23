@@ -1,10 +1,10 @@
 from builtins import range
 import scipy.stats as ss
 from scipy.special import gammaln as lgamma
-import statlib.fexact as f
-from statlib.fexact import fisher_exact as f_exact
-from statlib.asa159 import rcont2
-from statlib.asa205 import enum as rcont
+from .statlib import fexact as f
+from .statlib.fexact import fisher_exact as f_exact
+from .statlib.asa159 import rcont2
+from .statlib.asa205 import enum as rcont
 import numpy as np
 import logging
 import os
@@ -23,7 +23,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
     Parameters
     ----------
     table : array_like of ints
-        A 2x2 contingency table.  Elements should be non-negative integers.
+        A mxn contingency table.  Elements should be non-negative integers.
     alternative : {'two-sided', 'less', 'greater'}, optional
         Which alternative hypothesis to the null hypothesis the test uses.
         Default is 'two-sided'.  Only used in the 2 x 2 case (with the scipy

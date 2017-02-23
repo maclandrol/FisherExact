@@ -75,7 +75,7 @@ Functions
         Parameters
         ----------
         table : array_like of ints
-            A 2x2 contingency table.  Elements should be non-negative integers.
+            A mxn contingency table.  Elements should be non-negative integers.
         alternative : {'two-sided', 'less', 'greater'}, optional
             Which alternative hypothesis to the null hypothesis the test uses.
             Default is 'two-sided'.  Only used in the 2 x 2 case (with the scipy function).

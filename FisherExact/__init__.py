@@ -11,5 +11,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from Fisher import fisher_exact
+from .Fisher import fisher_exact
 __all__ = ['fisher_exact']

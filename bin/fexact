@@ -6,6 +6,7 @@ import numpy
 import re
 import FisherExact
 
+_version__ = "201702"
 
 def get_table_from_file(filename):
     row, column = 0, 0
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('--workspace', dest='workspace', default=300, type=int,
                         help="Workspace size to use, Increase this if the program crash")
     parser.add_argument('--version', action='version',
-                        version=FisherExact.__version__)
+                        version=_version__)
     parser.add_argument('contable', metavar='table',
                         help='Contingency table in a file, without header')
     args = parser.parse_args()

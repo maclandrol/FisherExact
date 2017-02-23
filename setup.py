@@ -17,7 +17,7 @@ except ImportError:
 from numpy.distutils.core import Extension as Ext
 from numpy.distutils.core import setup
 
-__version__ = "1.2.2"
+__version__ = "1.3"
 __project__ = "FisherExact"
 __author__ = "Emmanuel Noutahi"
 
@@ -72,15 +72,24 @@ def setup_package():
             'Intended Audience :: Developers',
             'Intended Audience :: Science/Research',
             'License :: OSI Approved :: GNU General Public License (GPL)',
+            'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX',
+            'Operating System :: Unix',
+            'Operating System :: MacOS',
             'Programming Language :: Python',
+            'Programming Language :: Python :: 2',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
         ],
 
         setup_requires=['numpy'],
         install_requires=[
-            'future',
-            'numpy',
-            'scipy',
+            'future>=0.15.0',
+            'numpy>=1.8.0',
+            'scipy>=0.16.0',
         ],
         ext_modules=fortran_extnsion
     )

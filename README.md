@@ -4,7 +4,9 @@ Fisher exact test for mxn contingency table
 
 ## Installation 
 
-You can install it with pip : pip install FisherExact
+You can install it with pip : `pip install FisherExact`
+
+If you get an error about builtins module, install "future" with `pip install future`
 
 ## Binary Usage
 
