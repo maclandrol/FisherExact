@@ -1,14 +1,18 @@
+[![PyPI version](https://badge.fury.io/py/FisherExact.svg)](https://badge.fury.io/py/FisherExact)
+
 # FisherExact
 
 Fisher exact test for mxn contingency table
 
 ## Installation 
 
-You can install it with pip : `pip install FisherExact`
+FisherExact should be python2/3 compatible. You can install it with pip : `pip install FisherExact`
 
 If you get an error about builtins module, install "future" with `pip install future`
 
-This package use fortran sources, so you need to have a fortran compiler (`gfortran`) installed. See here ==> https://gcc.gnu.org/wiki/GFortranBinaries 
+This package use fortran sources, so you need to have a fortran compiler (`gfortran`) installed. See here ==> https://gcc.gnu.org/wiki/GFortranBinaries.
+
+The source code was tested on Linux and Mac (thanks to [@fomightez](https://github.com/fomightez))
 
 ## Binary Usage
 
