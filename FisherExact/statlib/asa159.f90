@@ -301,7 +301,7 @@ function r8_uniform_01 ( seed )
 
   return
 end
-subroutine rcont2 ( nrow, ncol, nrowt, ncolt, key, seed, matrix, ierror )
+subroutine rcont2 ( nrow, ncol, nrowt, ncolt, maxtot, key, seed, fact, matrix, ierror )
 
 !*****************************************************************************80
 !
@@ -343,12 +343,17 @@ subroutine rcont2 ( nrow, ncol, nrowt, ncolt, key, seed, matrix, ierror )
 !    Input, integer ( kind = 4 ) NROWT(NROW), NCOLT(NCOL), the row and column
 !    sums.  Each entry must be positive.
 !
+!    Input, integer ( kind = 4 ) MAXTOT, the max total size for the matrix 
+!    column sum.
+!
 !    Input/output, logical KEY, a flag that indicates whether data has
 !    been initialized for this problem.  Set KEY = .FALSE. before the first
 !    call.
 !
 !    Input/output, integer ( kind = 4 ) SEED, a seed for the random number
 !    generator.
+!
+!    Input/output, real ( kind = 4 ) fact, contains the log factorials
 !
 !    Output, integer ( kind = 4 ) MATRIX(NROW,NCOL), the matrix.
 !
@@ -357,14 +362,14 @@ subroutine rcont2 ( nrow, ncol, nrowt, ncolt, key, seed, matrix, ierror )
 !
   implicit none
 
-  integer ( kind = 4 ), parameter :: maxtot = 5000
 
   integer ( kind = 4 ) ncol
   integer ( kind = 4 ) nrow
+  integer ( kind = 4 ) maxtot
+  real ( kind = 8 ), intent(inout) :: fact(maxtot+1)
 
   logical done1
   logical done2
-  real ( kind = 8 ), save, dimension ( maxtot+1 ) :: fact
   integer ( kind = 4 ) i
   integer ( kind = 4 ) ia
   integer ( kind = 4 ) iap

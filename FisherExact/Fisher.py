@@ -7,14 +7,16 @@ from .statlib.asa159 import rcont2
 from .statlib.asa205 import enum as rcont
 import numpy as np
 import logging
-import os
 import random
 
+
 class F2PYSTOP(Exception):
+
     def __call__(self, status, mes=""):
         raise self.__class__(mes)
 
 f.f2pystop = F2PYSTOP()
+
 
 def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
                  simulate_pval=False, replicate=2000, workspace=300,
@@ -52,10 +54,8 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
         Number of attempts to try, if the workspace size is not enough. 
         On each attempt, the workspace size is doubled. Default value is 3
     seed : int
-        Random number to use as seed. If a seed isn't provided. 4 bytes will be
-        read from os.urandom. If this fail, getrandbits of the random module 
-        (with 32 random bits) will be used. In the particular case where both
-        failed, the current time will be used
+        Random number to use as seed. If a seed isn't provided random.systemrandom
+        will be used, if this failed the current time will be used.
 
     Returns
     -------
@@ -106,7 +106,7 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
 
     if (nr == 2 and nc == 2):
         # I'm not sure what the fisher_exact module of ss do.
-        # So use my own function if midp is asked
+        # So use my own implementation of fisher exact if midp is asked
         if not midP:
             # in this case, just use the default scipy
             # could remove this in the future
@@ -127,8 +127,13 @@ def fisher_exact(table, alternative="two-sided", hybrid=False, midP=False,
                     'Less than 2 non-zero column or row marginal,\n %s' % c)
 
             statistic = -np.sum(lgamma(c + 1))
-            tmp_res = _fisher_sim(c, replicate, seed)
+            tmp_res = _fisher_sim(c, replicate, seed, workspace)
             almost = 1 + 64 * np.finfo(np.double).eps
+            # prevent value of 0, this is actually the best estimator
+            # alternatively, we could fit a distribution and compute pval
+            if np.sum(tmp_res <= statistic) < 1:
+                logging.warning(
+                    "All simulated values are lower than table statistic : pval technically of 0.")
             pval = (1 + np.sum(tmp_res <= statistic / almost)) / \
                 (replicate + 1.)
         elif hybrid:
@@ -147,12 +152,12 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace,
                     attempt=2, midP=False):
     """Execute fexact using the fortran routine"""
 
-    ## find required workspace 
+    # find required workspace
     #ntot = np.sum(c)+1
     #nco = max(nr, nc)
     #nro = nr +nc - nco
     #allocated = __iwork(0, ntot, 'double')
-    #allocated = __iwork(allocated, nco) *3 
+    #allocated = __iwork(allocated, nco) *3
     #allocated = __iwork(allocated, nco) *2
     #k =  nro + nco +1
     #kk = k*nco
@@ -174,7 +179,7 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace,
         except Exception as error:
             logging.warning(
                 "Workspace : %d is not enough. You should increase it.")
-        wk = wk << 1 #double workspace
+        wk = wk << 1  # double workspace
     if not success:
         raise ValueError('Could not execute fexact, increase workspace')
     if midP:
@@ -183,7 +188,7 @@ def _execute_fexact(nr, nc, c, nnr, expect, percnt, emin, workspace,
         return pval[1]
 
 
-def _fisher_sim(c, replicate, seed=None):
+def _fisher_sim(c, replicate, seed=None, wkslimit=5000):
     """Performs a simulation with `replicate` replicates in order to find an 
     alternative contingency test with the same margin.
     Parameters
@@ -192,42 +197,72 @@ def _fisher_sim(c, replicate, seed=None):
         A m x n contingency table.  Elements should be non-negative integers.
     replicate : int
         Number of replicates to perform for the simulation
-
     seed : int
         A random number to be used as seed
+    wkslimit : int
+        working space limit for the size of array containing factorial
     """
+
+    DFAULT_MAX_TOT = 5000
+    # set default maxtot to wkslimit
+    if wkslimit < DFAULT_MAX_TOT:
+        wkslimit = 5000
+
     if seed is None:
         try:
-            seed = os.urandom(4)
-            seed = int(seed.encode('hex'), 16)
+            seed = random.SystemRandom().randint(1, 100000)
+            seed = np.array([seed], dtype=np.int32)
         except:
             try:
-                seed = int(random.getrandbits(32))
-            except:
                 import time
                 seed = int(time.time())
+                seed = np.array([seed], dtype=np.int32)
+            except:
+                seed = 12345
+                seed = np.array([seed], dtype=np.int32)
 
-    seed = np.array([seed], dtype='int32')
     key = np.array([False], dtype=bool)
-    ierror = np.array([0], dtype='int32')
-    sr, sc = c.sum(axis=1).astype('int32'), c.sum(axis=0).astype('int32')
+    ierror = np.array([0], dtype=np.int32)
+    sr, sc = c.sum(axis=1).astype(np.int32), c.sum(axis=0).astype(np.int32)
     nr, nc = len(sr), len(sc)
     n = np.sum(sr)
     results = np.zeros(replicate)
 
-    fact = np.zeros(n + 1)
-    for i in xrange(2, n + 1):
-        fact[i] = fact[i - 1] + np.log(i)
+    if n < wkslimit:
+        # we can just set the limit  to the table sum
+        wkslimit = n
+        pass
+    else:
+        # throw error immediately
+        raise ValueError(
+            "Limit of %d on the table sum exceded (%d), please increase workspace !" % (DFAULT_MAX_TOT, n))
 
-    observed = np.zeros((nr, nc), dtype="int32", order='F')
+    maxtot = np.array([wkslimit], dtype=np.int32)
+
+    f = np.zeros(n + 1)
+    for i in xrange(2, n + 1):
+        f[i] = f[i - 1] + np.log(i)
+
+    observed = np.zeros((nr, nc), dtype=np.int32, order='F')
+
+    fact = np.zeros(wkslimit + 1, dtype=np.float, order='F')
+
     for it in xrange(replicate):
-        rcont2(nrow=nr, ncol=nc, nrowt=sr, ncolt=sc, key=key,
-               seed=seed, matrix=observed, ierror=ierror)
+        rcont2(nrow=nr, ncol=nc, nrowt=sr, ncolt=sc, maxtot=maxtot,
+               key=key, seed=seed, fact=fact, matrix=observed, ierror=ierror)
         # if we do not have an error, make spcial action
         ans = 0.
         tmp_observed = observed.ravel()
-        if ierror[0] != 0:
-            raise ValueError("Fortran subroutine rcont2 return an error !")
+        if ierror[0] in [1, 2]:
+            raise ValueError(
+                "Error in rcont2 (fortran) : row or column input size is less than 2!")
+        elif ierror[0] in [3, 4]:
+            raise ValueError(
+                "Error in rcont2 (fortran) : Negative values in table !")
+        elif ierror[0] == 6:
+            # this shouldn't happen with the previous check
+            raise ValueError(
+                "Error in rcont2 (fortran) : Limit on the table sum (%d) exceded, please increase workspace !" % DFAULT_MAX_TOT)
         for j in xrange(nc):
             i = 0
             ii = j * nr
@@ -241,7 +276,7 @@ def _fisher_sim(c, replicate, seed=None):
 
 def __iwork(allocated, number, itype='int'):
     """Check if the allocated memory is enough"""
-    
+
     i = allocated
     if itype == 'double':
         allocated += (number << 1)
@@ -258,7 +293,7 @@ def _midp(c):
     c : array_like of ints
         A m x n contingency table. Elements should be non-negative integers. 
     """
-    sr, sc = c.sum(axis=1).astype('int32'), c.sum(axis=0).astype('int32')
+    sr, sc = c.sum(axis=1).astype(np.int32), c.sum(axis=0).astype(np.int32)
     nr, nc = len(sr), len(sc)
     n = np.sum(sr)
     global result
