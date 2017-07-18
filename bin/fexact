@@ -42,7 +42,7 @@ def compute_pval(args):
     pval = FisherExact.fisher_exact(table, hybrid=args.hybrid, midP=args.midP,
                                     simulate_pval=args.simulate, replicate=args.simulate,
                                     workspace=args.workspace, attempt=args.attempt)
-    print("Pvalue : %f" % pval)
+    print("Pvalue : %.8e" % pval)
 
 if __name__ == '__main__':
 
