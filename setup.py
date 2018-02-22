@@ -17,7 +17,7 @@ except ImportError:
 from numpy.distutils.core import Extension as Ext
 from numpy.distutils.core import setup
 
-__version__ = "1.3"
+__version__ = "1.4"
 __project__ = "FisherExact"
 __author__ = "Emmanuel Noutahi"
 
