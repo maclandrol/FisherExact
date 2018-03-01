@@ -240,14 +240,14 @@ def _fisher_sim(c, replicate, seed=None, wkslimit=5000):
     maxtot = np.array([wkslimit], dtype=np.int32)
 
     f = np.zeros(n + 1)
-    for i in xrange(2, n + 1):
+    for i in range(2, n + 1):
         f[i] = f[i - 1] + np.log(i)
 
     observed = np.zeros((nr, nc), dtype=np.int32, order='F')
 
     fact = np.zeros(wkslimit + 1, dtype=np.float, order='F')
 
-    for it in xrange(replicate):
+    for it in range(replicate):
         rcont2(nrow=nr, ncol=nc, nrowt=sr, ncolt=sc, maxtot=maxtot,
                key=key, seed=seed, fact=fact, matrix=observed, ierror=ierror)
         # if we do not have an error, make spcial action
@@ -263,7 +263,7 @@ def _fisher_sim(c, replicate, seed=None, wkslimit=5000):
             # this shouldn't happen with the previous check
             raise ValueError(
                 "Error in rcont2 (fortran) : Limit on the table sum (%d) exceded, please increase workspace !" % DFAULT_MAX_TOT)
-        for j in xrange(nc):
+        for j in range(nc):
             i = 0
             ii = j * nr
             while(i < nr):
@@ -299,7 +299,7 @@ def _midp(c):
     global result
     result = []
     logfact = np.zeros(n + 1)
-    for i in xrange(2, n + 1):
+    for i in range(2, n + 1):
         logfact[i] = logfact[i - 1] + np.log(i)
 
     def callback(iflag, table, m, n, rowsum, colsum, prob, mult):
