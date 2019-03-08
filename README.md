@@ -1,4 +1,6 @@
-[![PyPI version](https://badge.fury.io/py/FisherExact.svg)](https://badge.fury.io/py/FisherExact)
+[![PyPI version](https://badge.fury.io/py/FisherExact.svg)](https://badge.fury.io/py/FisherExact) [![DOI](https://zenodo.org/badge/48862236.svg)](https://zenodo.org/badge/latestdoi/48862236)
+
+
 
 # FisherExact
 
@@ -115,3 +117,16 @@ For example, the following format are accepted
         p_value : float
             The probability of a more extreme table, where 'extreme' is in a 
             probabilistic sense.
+
+
+### If you need to cite.
+
+```
+@article{maclandrol,
+title={Fisher\'s exact test for MxN contingency table}, 
+DOI={10.5281/zenodo.2587757},
+publisher={Zenodo}, 
+author={Emmanuel Noutahi}, 
+year={2016}
+}
+```
