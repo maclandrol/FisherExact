@@ -127,6 +127,6 @@ title={Fisher\'s exact test for MxN contingency table},
 DOI={10.5281/zenodo.2587757},
 publisher={Zenodo}, 
 author={Emmanuel Noutahi}, 
-year={2016}
+year={2018}
 }
 ```
