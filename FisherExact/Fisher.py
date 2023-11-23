@@ -245,7 +245,7 @@ def _fisher_sim(c, replicate, seed=None, wkslimit=5000):
 
     observed = np.zeros((nr, nc), dtype=np.int32, order='F')
 
-    fact = np.zeros(wkslimit + 1, dtype=np.float, order='F')
+    fact = np.zeros(wkslimit + 1, dtype=np.float32, order='F')
 
     for it in range(replicate):
         rcont2(nrow=nr, ncol=nc, nrowt=sr, ncolt=sc, maxtot=maxtot,
