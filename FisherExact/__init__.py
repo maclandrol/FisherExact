@@ -12,4 +12,5 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .Fisher import fisher_exact
-__all__ = ['fisher_exact']
+
+__all__ = ["fisher_exact"]
