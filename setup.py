@@ -71,7 +71,7 @@ def setup_package():
         entry_points={"console_scripts": []},
         keywords="statistic fisher independence test",
         long_description=(README + "\n"),
-        license="GPL",
+        license="MIT",
         classifiers=[
             "Development Status :: 4 - Beta",
             "Environment :: Console",
