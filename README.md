@@ -1,6 +1,15 @@
-[![PyPI version](https://badge.fury.io/py/FisherExact.svg)](https://badge.fury.io/py/FisherExact) [![DOI](https://zenodo.org/badge/48862236.svg)](https://zenodo.org/badge/latestdoi/48862236)
+> [!WARNING]
+>
+> ## This repository is archived and no longer maintained
+>
+> **For new projects, use [`scipy.stats.fisher_exact`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisher_exact.html) instead.**
+>
+> Since [SciPy 1.15.0](https://docs.scipy.org/doc/scipy-1.15.0/release/1.15.0-notes.html), SciPy supports Fisher’s exact test for two-dimensional **R × C contingency tables**.
+>
+> See the [original SciPy issue](https://github.com/scipy/scipy/issues/7099) and the [implementation PR](https://github.com/scipy/scipy/pull/21996).
 
-
+[![PyPI version](https://badge.fury.io/py/FisherExact.svg)](https://pypi.org/project/FisherExact/)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.2587757-blue.svg)](https://doi.org/10.5281/zenodo.2587757)
 
 # FisherExact
 
